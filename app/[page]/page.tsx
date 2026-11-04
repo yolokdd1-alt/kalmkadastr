@@ -1,0 +1,2 @@
+import {Catalog,Quiz,Calculator,Projects,About,Contacts,Account,Privacy} from '../../components/Tools';
+const pages={services:Catalog,quiz:Quiz,calculator:Calculator,projects:Projects,about:About,contacts:Contacts,account:Account,privacy:Privacy};export function generateStaticParams(){return Object.keys(pages).map(page=>({page}))}export default async function Page({params}:{params:Promise<{page:string}>}){const {page}=await params;const Component=pages[page as keyof typeof pages];return <Component/>}

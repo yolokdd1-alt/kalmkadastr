@@ -1,0 +1,1 @@
+import {ProjectPage} from '../../../components/Tools';export function generateStaticParams(){return ['land','house','survey'].map(slug=>({slug}))}export default async function Page({params}:{params:Promise<{slug:string}>}){return <ProjectPage slug={(await params).slug}/>}

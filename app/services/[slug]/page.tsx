@@ -1,0 +1,1 @@
+import {ServicePage} from '../../../components/Tools';import {services} from '../../../components/data';export function generateStaticParams(){return services.map(s=>({slug:s.slug}))}export default async function Page({params}:{params:Promise<{slug:string}>}){return <ServicePage slug={(await params).slug}/>}
