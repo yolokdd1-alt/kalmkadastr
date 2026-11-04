@@ -27,7 +27,7 @@ function Model({mode,select}:{mode:number,select:(n:string)=>void}){const [hover
 </group>
 {[[-2.75,-1.85],[-2.8,1.7],[2.65,-1.8],[2.7,-.6]].map(([x,z],i)=><Tree key={i} x={x} z={z}/>)}
 <Line points={[[-3.25,.1,2.55],[3.25,.1,2.55],[3.25,.1,-2.55],[-3.25,.1,-2.55],[-3.25,.1,2.55]]} color={lime} lineWidth={2.5}/>
-{[[-3.25,2.55],[3.25,2.55],[3.25,-2.55],[-3.25,-2.55]].map(([x,z],i)=><group key={i} position={[x,.12,z]}><mesh onClick={()=>select('Межевание земельного участка')}><sphereGeometry args={[.075,16,16]}/><meshBasicMaterial color="#d7ff64"/></mesh><Line points={[[0,0,0],[0,.5,0]]} color="#d7ff64" lineWidth={1}/></group>)}
+{[[-3.25,2.55],[3.25,2.55],[3.25,-2.55],[-3.25,-2.55]].map(([x,z],i)=><group key={i} position={[x,.12,z]}><mesh onClick={()=>select('Вынос границ земельного участка в натуру')}><sphereGeometry args={[.075,16,16]}/><meshBasicMaterial color="#d7ff64"/></mesh><Line points={[[0,0,0],[0,.5,0]]} color="#d7ff64" lineWidth={1}/></group>)}
 
 
 {mode===1&&[-2,-1,0,1,2].map((x,i)=><Line key={i} points={[[x,.13,-2.5],[x,.13,2.5]]} color="#e7ffaf" lineWidth={1} dashed dashSize={.12} gapSize={.12}/>)}
