@@ -24,6 +24,7 @@ jobs:
       - run: npm run build
         env:
           NEXT_PUBLIC_BASE_PATH: /kalmkadastr
+          NEXT_PUBLIC_ENQUIRY_API: ${{ vars.NEXT_PUBLIC_ENQUIRY_API }}
       - uses: actions/upload-pages-artifact@v4
         with:
           path: out

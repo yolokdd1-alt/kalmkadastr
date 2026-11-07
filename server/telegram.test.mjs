@@ -1,0 +1,8 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {submit} from './telegram.mjs';
+function form(){const f=new FormData();for(const [k,v] of Object.entries({name:'Тестовый клиент',phone:'+7 999 123 45 67',consent:'yes',district:'Целинный',address:'Троицкое',service:'Вынос границ'}))f.set(k,v);return f}
+const success=async()=>new Response(JSON.stringify({ok:true,result:{message_id:1}}));
+test('forwards text and files without markup parsing',async()=>{const f=form();f.set('files',new Blob(['%PDF-test'],{type:'application/pdf'}),'plan.pdf');const calls=[];const result=await submit(f,{token:'test',chatId:'1',fetcher:async(url,options)=>{calls.push({url,body:options.body});return success()}});assert.equal(result.ok,true);assert.equal(calls.length,2);assert.match(calls[0].body.get('text'),/Целинный/);assert.equal(calls[0].body.has('parse_mode'),false)});
+test('rejects missing consent before network',async()=>{const f=form();f.delete('consent');await assert.rejects(submit(f,{fetcher:()=>{throw Error('network')}}),/согласие/)});
+test('reports unconfigured server',async()=>{await assert.rejects(submit(form(),{}),e=>e.status===503)});
+test('reports delivery failure, never false success',async()=>{await assert.rejects(submit(form(),{token:'test',chatId:'1',fetcher:async()=>new Response('{}',{status:500})}),e=>e.status===502)});
+test('preserves delivered text if attachment fails',async()=>{const f=form();f.set('files',new Blob(['x']),'a.pdf');let n=0;const r=await submit(f,{token:'test',chatId:'1',fetcher:async()=>++n===1?success():new Response('{}',{status:500})});assert.equal(r.ok,true);assert.match(r.warning,/часть файлов/)});
