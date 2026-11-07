@@ -1,0 +1,11 @@
+# Include these locations inside a separately configured HTTPS server block.
+# No domain or certificates are invented here. Do not replace existing sites.
+location = /api/enquiries {
+    client_max_body_size 12m;
+    proxy_pass http://127.0.0.1:8787;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_read_timeout 120s;
+    proxy_connect_timeout 5s;
+    add_header X-Content-Type-Options nosniff always;
+}
