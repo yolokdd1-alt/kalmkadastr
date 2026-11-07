@@ -6,3 +6,6 @@ test('rejects missing consent before network',async()=>{const f=form();f.delete(
 test('reports unconfigured server',async()=>{await assert.rejects(submit(form(),{}),e=>e.status===503)});
 test('reports delivery failure, never false success',async()=>{await assert.rejects(submit(form(),{token:'test',chatId:'1',fetcher:async()=>new Response('{}',{status:500})}),e=>e.status===502)});
 test('preserves delivered text if attachment fails',async()=>{const f=form();f.set('files',new Blob(['x']),'a.pdf');let n=0;const r=await submit(f,{token:'test',chatId:'1',fetcher:async()=>++n===1?success():new Response('{}',{status:500})});assert.equal(r.ok,true);assert.match(r.warning,/часть файлов/)});
+test('rejects unsupported files before delivery',async()=>{const f=form();f.set('files',new Blob(['bad']),'run.exe');let called=false;await assert.rejects(submit(f,{fetcher:async()=>{called=true;return success()}}),/файлов/);assert.equal(called,false)});
+test('rejects invalid phone',async()=>{const f=form();f.set('phone','123');await assert.rejects(submit(f,{}),/телефон/)});
+test('rejects oversized text without truncating customer input',async()=>{const f=form();f.set('comment','x'.repeat(1501));await assert.rejects(submit(f,{}),/длинное/)});
