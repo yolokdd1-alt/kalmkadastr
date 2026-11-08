@@ -14,11 +14,11 @@ const server=http.createServer(async(req,res)=>{
  if(req.method==='OPTIONS'){res.writeHead(204,{'Access-Control-Allow-Methods':'POST, OPTIONS','Access-Control-Allow-Headers':'Content-Type'});return res.end()}
  if(req.method!=='POST')return reply(405,{error:'Метод не поддерживается'});
  const ip=String(req.headers['x-real-ip']||req.socket.remoteAddress);const now=Date.now();const rate=limits.get(ip);if(rate&&rate.until>now&&rate.count>=5)return reply(429,{error:'Слишком много попыток. Повторите через 10 минут.'});limits.set(ip,rate&&rate.until>now?{...rate,count:rate.count+1}:{count:1,until:now+600000});
- // Bind to loopback: Nginx supplies TLS and enforces a second upload/rate limit.
+ // The proxy supplies TLS and sets X-Real-IP. Bind to loopback by default.
  try{if(!req.headers['content-type']?.startsWith('multipart/form-data;'))return reply(415,{error:'Ожидается форма'});let size=0;const chunks=[];for await(const chunk of req){size+=chunk.length;if(size>MAX_BODY)return reply(413,{error:'Файлы слишком большие'});chunks.push(chunk)}
  const request=new Request('http://localhost/api/enquiries',{method:'POST',headers:{'Content-Type':req.headers['content-type']},body:Buffer.concat(chunks)});const form=await request.formData();if(form.get('website'))return reply(400,{error:'Не удалось отправить форму'});
  const result=await submit(form,{token:process.env.TELEGRAM_BOT_TOKEN,chatId:process.env.TELEGRAM_CHAT_ID,fetcher:telegramFetch});reply(200,result);
  }catch(e){reply(e.status||400,{error:e.status?e.message:'Проверьте заполнение формы и размер файлов.'})}
 });
 server.requestTimeout=30000;server.headersTimeout=10000;
-server.listen(Number(process.env.PORT||8787),'127.0.0.1',()=>console.log('Enquiry API listening on loopback'));
+server.listen(Number(process.env.PORT||8787),process.env.BIND_HOST || '127.0.0.1',()=>console.log('Enquiry API ready'));
