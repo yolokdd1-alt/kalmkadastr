@@ -1,5 +1,6 @@
 import http from 'node:http';
 import {submit,MAX_BODY} from './telegram.mjs';
+import {telegramFetch} from './telegram-transport.mjs';
 const origins=new Set((process.env.ALLOWED_ORIGINS||'').split(',').filter(Boolean));
 const limits=new Map();
 setInterval(()=>{const now=Date.now();for(const [key,v] of limits)if(v.until<now)limits.delete(key)},60000).unref();
@@ -16,7 +17,7 @@ const server=http.createServer(async(req,res)=>{
  // Bind to loopback: Nginx supplies TLS and enforces a second upload/rate limit.
  try{if(!req.headers['content-type']?.startsWith('multipart/form-data;'))return reply(415,{error:'Ожидается форма'});let size=0;const chunks=[];for await(const chunk of req){size+=chunk.length;if(size>MAX_BODY)return reply(413,{error:'Файлы слишком большие'});chunks.push(chunk)}
  const request=new Request('http://localhost/api/enquiries',{method:'POST',headers:{'Content-Type':req.headers['content-type']},body:Buffer.concat(chunks)});const form=await request.formData();if(form.get('website'))return reply(400,{error:'Не удалось отправить форму'});
- const result=await submit(form,{token:process.env.TELEGRAM_BOT_TOKEN,chatId:process.env.TELEGRAM_CHAT_ID});reply(200,result);
+ const result=await submit(form,{token:process.env.TELEGRAM_BOT_TOKEN,chatId:process.env.TELEGRAM_CHAT_ID,fetcher:telegramFetch});reply(200,result);
  }catch(e){reply(e.status||400,{error:e.status?e.message:'Проверьте заполнение формы и размер файлов.'})}
 });
 server.requestTimeout=30000;server.headersTimeout=10000;
